@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.ziyaowang.com/"/>
-  <updated>2020-06-07T01:33:32.763Z</updated>
+  <updated>2020-07-27T01:31:10.578Z</updated>
   <id>http://www.ziyaowang.com/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>SpringBoot MyBatis随机出现的Mapper参数失效问题（未完）</title>
+    <link href="http://www.ziyaowang.com/title.html"/>
+    <id>http://www.ziyaowang.com/title.html</id>
+    <published>2020-07-27T01:22:42.000Z</published>
+    <updated>2020-07-27T01:31:10.578Z</updated>
+    
+    <content type="html"><![CDATA[<p>这两天做mybatis的开发遇到了一个很神奇的问题<br>我是在Mapper类里面直接使用的注解<br>然后有一行这个代码：</p><pre><code>@Update(&quot;update UserBasic set iconUrl = #{iconUrl} where id = #{id}&quot;)int updateIconUrl(long id, String iconUrl);</code></pre><p>一般来说，iconUrl和id应该就会被对应上去，经过我的第一次测试，的确没问题。<br>然而神奇的事情发生了，当我打包好push到docker，再部署到了EC2以后，运行，访问调用了这个query的api接口，居然报错。出现了以下错误：</p><p>org.apache.ibatis.binding.BindingException: Parameter ‘iconUrl’ not found. Available parameters are [arg1, arg0, param1, param2]<br>        at org.apache.ibatis.binding.MapperMethod$ParamMap.get(MapperMethod.java:212) ~[mybatis-3.5.4.jar!/:3.5.4]<br>        at org.apache.ibatis.reflection.wrapper.MapWrapper.get(MapWrapper.java:45) ~[mybatis-3.5.4.jar!/:3.5.4]<br>        at org.apache.ibatis.reflection.MetaObject.getValue(MetaObject.java:122) ~[mybatis-3.5.4.jar!/:3.5.4]</p><p>这个就很不解了。明明刚刚测试过没有问题，我再三检查了以下query，也没有发现问题。于是我在我的本地计算机连上我本地的mysql又测试了一次，what?居然报了同样的错误，明明刚刚还是好的。此时此刻的我陷入了recursive的沉思…….</p><p>再经历了一阵谷歌以后，发现有人用xml做mapping也遇到过类似的问题，具体底层为什么会出现这个问题，本人还在探索之中，那么现在直接先上解决办法吧</p><pre><code>@Update(&quot;update UserBasic set iconUrl = #{iconUrl} where id = #{id}&quot;)int updateIconUrl(@Param(&quot;id&quot;) long id, @Param(&quot;iconUrl&quot;) String iconUrl);</code></pre><p>没错，在传入的参数前加一个@Param注解，填上对应的column列名，就没问题了。<br>暂时不知道是什么原因，因为是随机发生，一会儿好，一会儿崩溃失效。回头我在找到答案以后会更新这个问题的结果。希望对遇到同样问题的朋友会有所帮助。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;这两天做mybatis的开发遇到了一个很神奇的问题&lt;br&gt;我是在Mapper类里面直接使用的注解&lt;br&gt;然后有一行这个代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;@Update(&amp;quot;update UserBasic set iconUrl = #{iconUrl} whe
+      
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>了解Spring Bean Scope这一篇文章就够了</title>

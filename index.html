@@ -109,6 +109,48 @@
 	   
 	<div class="article-header">
 	    
+		<a class="article-title" href="/title.html">SpringBoot+Mybatis+mysql 注解和XML同时使用的配置问题</a>  
+	       
+		 
+
+		<div class="article-meta">
+			<time>Aug 10, 2020</time>
+			
+		</div>
+	</div>
+
+
+	
+
+    
+	<div class="typo article-excerpt">	
+		 
+			<p>在同时使用注解和XML配置mapper的情况下，会报错：</p>
+<p>Invalid bound statement (not found)</p>
+<p>主要原因在于链接mysql会在自定义的一个configuration配置文件中创建sqlSessionFactory,而在这个时候application.yml中的Mybatis配置就读取不了了<br>所以mapper和xml会一直匹配不上，因为找不到xml文件</p>
+<p>所以这个时候需要在sqlSessionFactory创建配置里添加如下代码：</p>
+<p>ResourcePatternResolver resolver = new PathMatchingResourcepatternResolver();<br>sessionFactory.setMapperLocation(resolver.getResources(“path”));</p>
+<p>这两行代码的作用就是手动读取你xml mapper存放的位置，一般是classpath:mapper/*.xml<br>备注：classpath指代的是java和resources两个文件夹</p>
+<p>这样问题就解决了！</p>
+<p>这个问题困扰了我很久…..网上的解决办法根本没用，检查了包名namespace方法名等都没问题，最后这样两行代码解决了。。。。</p>
+
+		  	  
+	</div>
+
+	<div class="article-bottom">
+		<a class="article-readmore" href="/title.html">Continue</a> 	
+	</div>	
+    
+</article>     
+     	
+    	  	
+  		
+    			
+
+<article class="article">		
+	   
+	<div class="article-header">
+	    
 		<a class="article-title" href="/title.html">SpringBoot MyBatis随机出现的Mapper参数失效问题（未完）</a>  
 	       
 		 

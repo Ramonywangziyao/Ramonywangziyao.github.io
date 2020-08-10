@@ -3,6 +3,14 @@
   
     
     <entry>
+      <title>SpringBoot+Mybatis+mysql 注解和XML同时使用的配置问题</title>
+      <link href="/title.html"/>
+      <content type="html"><![CDATA[<p>在同时使用注解和XML配置mapper的情况下，会报错：</p><p>Invalid bound statement (not found)</p><p>主要原因在于链接mysql会在自定义的一个configuration配置文件中创建sqlSessionFactory,而在这个时候application.yml中的Mybatis配置就读取不了了<br>所以mapper和xml会一直匹配不上，因为找不到xml文件</p><p>所以这个时候需要在sqlSessionFactory创建配置里添加如下代码：</p><p>ResourcePatternResolver resolver = new PathMatchingResourcepatternResolver();<br>sessionFactory.setMapperLocation(resolver.getResources(“path”));</p><p>这两行代码的作用就是手动读取你xml mapper存放的位置，一般是classpath:mapper/*.xml<br>备注：classpath指代的是java和resources两个文件夹</p><p>这样问题就解决了！</p><p>这个问题困扰了我很久…..网上的解决办法根本没用，检查了包名namespace方法名等都没问题，最后这样两行代码解决了。。。。</p>]]></content>
+      
+      
+    </entry>
+    
+    <entry>
       <title>SpringBoot MyBatis随机出现的Mapper参数失效问题（未完）</title>
       <link href="/title.html"/>
       <content type="html"><![CDATA[<p>这两天做mybatis的开发遇到了一个很神奇的问题<br>我是在Mapper类里面直接使用的注解<br>然后有一行这个代码：</p><pre><code>@Update(&quot;update UserBasic set iconUrl = #{iconUrl} where id = #{id}&quot;)int updateIconUrl(long id, String iconUrl);</code></pre><p>一般来说，iconUrl和id应该就会被对应上去，经过我的第一次测试，的确没问题。<br>然而神奇的事情发生了，当我打包好push到docker，再部署到了EC2以后，运行，访问调用了这个query的api接口，居然报错。出现了以下错误：</p><p>org.apache.ibatis.binding.BindingException: Parameter ‘iconUrl’ not found. Available parameters are [arg1, arg0, param1, param2]<br>        at org.apache.ibatis.binding.MapperMethod$ParamMap.get(MapperMethod.java:212) ~[mybatis-3.5.4.jar!/:3.5.4]<br>        at org.apache.ibatis.reflection.wrapper.MapWrapper.get(MapWrapper.java:45) ~[mybatis-3.5.4.jar!/:3.5.4]<br>        at org.apache.ibatis.reflection.MetaObject.getValue(MetaObject.java:122) ~[mybatis-3.5.4.jar!/:3.5.4]</p><p>这个就很不解了。明明刚刚测试过没有问题，我再三检查了以下query，也没有发现问题。于是我在我的本地计算机连上我本地的mysql又测试了一次，what?居然报了同样的错误，明明刚刚还是好的。此时此刻的我陷入了recursive的沉思…….</p><p>再经历了一阵谷歌以后，发现有人用xml做mapping也遇到过类似的问题，具体底层为什么会出现这个问题，本人还在探索之中，那么现在直接先上解决办法吧</p><pre><code>@Update(&quot;update UserBasic set iconUrl = #{iconUrl} where id = #{id}&quot;)int updateIconUrl(@Param(&quot;id&quot;) long id, @Param(&quot;iconUrl&quot;) String iconUrl);</code></pre><p>没错，在传入的参数前加一个@Param注解，填上对应的column列名，就没问题了。<br>暂时不知道是什么原因，因为是随机发生，一会儿好，一会儿崩溃失效。回头我在找到答案以后会更新这个问题的结果。希望对遇到同样问题的朋友会有所帮助。</p>]]></content>
